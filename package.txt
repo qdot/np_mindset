@@ -1,0 +1,7 @@
+NAME=np_mindset
+BUILDTYPE=multi
+SRCS=ThinkGearStreamParser.c np_mindset.flext.cpp 
+CFLAGS+=-I. -I/Users/qdot/git-projects/library/usr_darwin_10.5_x86/include/
+LIBS=/Users/qdot/git-projects/library/usr_darwin_10.5_x86/lib/libboost_thread-xgcc40-mt.a /Users/qdot/git-projects/library/usr_darwin_10.5_x86/lib/libboost_system-xgcc40-mt.a 
+
+

@@ -1,0 +1,6 @@
+np_mindset ChangeLog
+===========================
+
+2009-09-30 Kyle Machulis <kyle@nonpolynomial.com>
+	* Release v1.0
+	* Released first version
