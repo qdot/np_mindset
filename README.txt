@@ -21,9 +21,17 @@ Flext: http://www.parasitaere-kapazitaeten.net/ext/flext/
 Mindset Information
 ===========================
 
-More information about the Novint Falcon can be found at 
+More information about the Neurosky Mindset can be found at 
 
 http://www.neurosky.com
+
+===================
+Source Requirements
+===================
+
+ThinkGearStreamParser.c/h and thinkgear.h, while free, are distributed as part of the MindSet SDK, and will need to be retreived from the Neurosky developer site. The SDK is available for free at
+
+http://developer.neurosky.com/ 
 
 ============
 Installation
