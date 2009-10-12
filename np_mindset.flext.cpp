@@ -96,7 +96,7 @@ int NeuroskyMindset::read()
 	{
 		THINKGEAR_parseByte(m_streamParser.get(), values[i]);
 	}
-	sleep(0.001);
+	usleep(100);
 }
 
 class np_mindset:
@@ -131,7 +131,10 @@ public:
 	np_mindset() :
 		m_runThread(false),
 		m_isRunning(false),
-		m_hasUpdated(false),
+		m_attentionUpdated(false),
+		m_meditationUpdated(false),
+		m_connectionUpdated(false),
+		m_powerUpdated(false),
 		m_attentionValue(0),
 		m_meditationValue(0),
 		m_connectionQuality(0),
@@ -181,18 +184,15 @@ public:
 		if(m_attentionValue == val) return;
 		ScopedMutex m(m_mindsetMutex);
 		m_attentionValue = val;
-		m_hasUpdated = true;
+		m_attentionUpdated = true;
 	}
 
 	void setMeditation(int val)
 	{
 		if(m_meditationValue == val) return;
-		Lock();
-		post("Setting Med %d", val);
-		Unlock();
 		ScopedMutex m(m_mindsetMutex);
 		m_meditationValue = val;
-		m_hasUpdated = true;
+		m_meditationUpdated = true;
 
 	}
 
@@ -201,7 +201,7 @@ public:
 		if(m_connectionQuality == val) return;
 		ScopedMutex m(m_mindsetMutex);
 		m_connectionQuality = val;
-		m_hasUpdated = true;
+		m_connectionUpdated = true;
 	}
 
 	void setPowerLevels(boost::array<unsigned int, 7> power_levels)
@@ -209,7 +209,7 @@ public:
 		ScopedMutex m(m_mindsetMutex);
 		//This is guaranteed to pretty much always change
 		m_powerLevels = power_levels;
-		m_hasUpdated = true;
+		m_powerUpdated = true;
 	}
 
 	void setRawLevel(int raw_level)
@@ -217,7 +217,6 @@ public:
 		ScopedMutex m(m_mindsetMutex);
 		//This is guaranteed to pretty much always change
 		m_rawLevel = raw_level;
-		m_hasUpdated = true;
 	}
 
 protected:
@@ -231,6 +230,10 @@ protected:
 	volatile bool m_hasUpdated;
 	volatile bool m_runThread;
 	volatile bool m_isRunning;
+	bool m_attentionUpdated;
+	bool m_meditationUpdated;
+	bool m_connectionUpdated;
+	bool m_powerUpdated;
 	ThrMutex m_mindsetMutex;
 
 	void mindset_open()
@@ -281,16 +284,25 @@ protected:
 		ScopedMutex m(m_mindsetMutex);
 		Lock();
 		ToOutBang(0);
-		ToOutInt(1, m_connectionQuality);
-		ToOutInt(2, m_attentionValue);
-		ToOutInt(3, m_meditationValue);
+		if(m_connectionUpdated)
+			ToOutInt(1, m_connectionQuality);
+		if(m_attentionUpdated)
+			ToOutInt(2, m_attentionValue);
+		if(m_meditationUpdated)
+			ToOutInt(3, m_meditationValue);		
 		ToOutInt(4, m_rawLevel);
-		for(int i = 0; i < 7; ++i)
+		if(m_powerUpdated)
 		{
-			SetInt(m_powerList[i], m_powerLevels[i]);
+			for(int i = 0; i < 7; ++i)
+			{
+				SetInt(m_powerList[i], m_powerLevels[i]);
+			}
+			ToOutList(5, 7, m_powerList);
 		}
-		ToOutList(5, 7, m_powerList);
-		m_hasUpdated = false;
+		m_attentionUpdated = false;
+		m_connectionUpdated = false;
+		m_meditationUpdated = false;
+		m_powerUpdated = false;
 		Unlock();
 	}
 
@@ -330,12 +342,10 @@ void dataPacketHandler( unsigned char extendedCodeLevel,
 		l = value[0] << 8 | value[1];
 		int a = l;
 		m->setRawLevel(a);
-		//std::cout << "Raw: " << l << std::endl;		
 	}
 	else if (code == 0x83)
 	{
 		boost::array<unsigned int, 7> b;
-		//std::cout << "Levels: " << std::endl;
 		for(int i = 0; i < 7; ++i)
 		{
 			unsigned int l = 0;
