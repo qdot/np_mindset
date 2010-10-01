@@ -130,10 +130,10 @@ public:
 	// constructor
 	np_mindset() :
 		m_runThread(false),
-		m_isRunning(false),
 		m_attentionUpdated(false),
 		m_meditationUpdated(false),
 		m_connectionUpdated(false),
+		m_isOpen(false),
 		m_powerUpdated(false),
 		m_attentionValue(0),
 		m_meditationValue(0),
@@ -151,12 +151,13 @@ public:
 		AddOutList("Wave Values (delta, theta, low-alpha, high-alpha, low-beta, high-beta, low-gamma, and mid-gamma)");
 		
 		FLEXT_ADDBANG(0, mindset_output);
-		FLEXT_ADDMETHOD_(0, "open", mindset_open);
+		//FLEXT_ADDMETHOD_(0, "open", mindset_open);
+		FLEXT_ADDMETHOD_(0, "open", mindset_anything);
 		FLEXT_ADDMETHOD_(0, "start", mindset_start);
 		FLEXT_ADDMETHOD_(0, "close", mindset_close);
 		FLEXT_ADDMETHOD_(0, "stop", mindset_stop);
 
-		post("Neurosky Mindset External v1.0");
+		post("Neurosky Mindset External v0.5");
 		post("by Nonpolynomial Labs (http://www.nonpolynomial.com)");
 		post("Updates at http://www.github.com/qdot/np_mindset");
 		post("Compiled on " __DATE__ " " __TIME__);
@@ -171,12 +172,13 @@ public:
 
 	virtual void Exit()
 	{
+		mindset_close();
 		flext_base::Exit();
 	}
 
 	virtual ~np_mindset()
 	{
-		close();
+		mindset_close();
 	}	
 
 	void setAttention(int val)
@@ -229,33 +231,47 @@ protected:
 	t_atom m_powerList[7];
 	volatile bool m_hasUpdated;
 	volatile bool m_runThread;
-	volatile bool m_isRunning;
 	bool m_attentionUpdated;
 	bool m_meditationUpdated;
 	bool m_connectionUpdated;
 	bool m_powerUpdated;
+	bool m_isOpen;
 	ThrMutex m_mindsetMutex;
-
-	void mindset_open()
-	{
-		if(!open("/dev/tty.MindSet-DevB-1"))
-		{
-			post("Cannot open, exiting");
-		}   
-		post("Opened Mindset");
-	}
-
+	ThrMutex m_threadMutex;
+	
 	void mindset_close()
 	{
+		if(!m_isOpen)
+		{
+			post("np_mindset - Mindset not currently open");
+			return;
+		}
 		post("Closing Mindset");
-		mindset_stop();
-		//while(m_isRunning);
+		if(!m_threadMutex.TryLock())
+		{
+			mindset_stop();
+			m_threadMutex.Lock();
+		}
+		m_threadMutex.Unlock();
 		close();
+		m_isOpen = false;
 		post("Closed Mindset");
 	}
 
 	void mindset_anything(const t_symbol *msg,int argc,t_atom *argv)
 	{
+		if(!strcmp(msg->s_name, "open"))
+		{
+			std::string port = GetString(argv[0]);
+			if(!open(port))
+			{
+				post("Cannot open, exiting");
+				return;
+			}
+			m_isOpen = true;
+			post("Opened Mindset");
+			return;
+		}
 		post("np_mindset: not a valid np_mindset message: %s", msg->s_name);
 	}
 
@@ -267,15 +283,21 @@ protected:
 
 	void mindset_start()
 	{
+		if(!m_threadMutex.TryLock())
+		{
+			post("np_mindset - Thread already running");
+			return;
+		}
+		m_threadMutex.Unlock();
+		ScopedMutex m(m_threadMutex);
 		post("Entering mindset thread");
 		m_runThread = true;
-		m_isRunning = true;
-		while(m_runThread)
+		while(!ShouldExit() && m_runThread)
 		{
 			read();
 			mindset_output();
+			Sleep(.001);
 		}
-		//m_isRunning = false;
 		post("Exiting mindset thread");
 	}
 
@@ -310,7 +332,6 @@ private:
 	FLEXT_CALLBACK_A(mindset_anything)
 	FLEXT_THREAD(mindset_start)
 	FLEXT_CALLBACK(mindset_stop)
-	FLEXT_CALLBACK(mindset_open)
 	FLEXT_CALLBACK(mindset_close)
 	FLEXT_CALLBACK(mindset_output)
 };
