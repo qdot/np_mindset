@@ -252,7 +252,7 @@ protected:
 			post("np_mindset - Mindset not currently open");
 			return;
 		}
-		post("Closing Mindset");
+		post("np_mindset - Closing Mindset");
 		if(!m_threadMutex.TryLock())
 		{
 			mindset_stop();
@@ -261,7 +261,7 @@ protected:
 		m_threadMutex.Unlock();
 		close();
 		m_isOpen = false;
-		post("Closed Mindset");
+		post("np_mindset - Closed Mindset");
 	}
 
 	void mindset_anything(const t_symbol *msg,int argc,t_atom *argv)
@@ -271,15 +271,15 @@ protected:
 			std::string port = GetString(argv[0]);
 			if(!open(port))
 			{
-				post("Cannot open, exiting");
+				post("np_mindset - Cannot open, exiting");
 				return;
 			}
 			m_isOpen = true;
-			post("Opened Mindset");
+			post("np_mindset - Opened Mindset");
 			ToOutBang(0);
 			return;
 		}
-		post("np_mindset: not a valid np_mindset message: %s", msg->s_name);
+		post("np_mindset - not a valid np_mindset message: %s", msg->s_name);
 	}
 
 	void mindset_raw(long t)
@@ -313,7 +313,7 @@ protected:
 		m_threadMutex.Unlock();
 		ScopedMutex m(m_threadMutex);
 		ToOutBang(0);
-		post("Entering mindset thread");
+		post("np_mindset - Entering mindset thread");
 		m_runThread = true;
 		while(!ShouldExit() && m_runThread)
 		{
@@ -321,7 +321,7 @@ protected:
 			mindset_output();
 			Sleep(m_sleepTime);
 		}
-		post("Exiting mindset thread");
+		post("np_mindset - Exiting mindset thread");
 	}
 
 	void mindset_output()
