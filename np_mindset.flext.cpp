@@ -1,7 +1,7 @@
 /*
  * Implementation file for Neurosky Mindset Max/Pd External
  *
- * Copyright (c) 2009 Kyle Machulis/Nonpolynomial Labs <kyle@nonpolynomial.com>
+ * Copyright (c) 2009-2010 Kyle Machulis/Nonpolynomial Labs <kyle@nonpolynomial.com>
  *
  * More info on Nonpolynomial Labs @ http://www.nonpolynomial.com
  *
@@ -138,11 +138,14 @@ public:
 		m_attentionValue(0),
 		m_meditationValue(0),
 		m_connectionQuality(0),
-		m_rawLevel(0)
+		m_outputRaw(false),
+		m_rawLevel(0),
+		m_sleepTime(.1)
 	{
 
 		// external setup
 		AddInAnything("Command Input");
+		AddInInt("Toggle Raw Wave Output");
 		AddOutBang("Bangs on successful connection/command");
 		AddOutInt("Connection Quality Value");
 		AddOutInt("eSense Attention Value");
@@ -151,13 +154,14 @@ public:
 		AddOutList("Wave Values (delta, theta, low-alpha, high-alpha, low-beta, high-beta, low-gamma, and mid-gamma)");
 		
 		FLEXT_ADDBANG(0, mindset_output);
-		//FLEXT_ADDMETHOD_(0, "open", mindset_open);
+		FLEXT_ADDMETHOD(1, mindset_raw);
 		FLEXT_ADDMETHOD_(0, "open", mindset_anything);
 		FLEXT_ADDMETHOD_(0, "start", mindset_start);
-		FLEXT_ADDMETHOD_(0, "close", mindset_close);
 		FLEXT_ADDMETHOD_(0, "stop", mindset_stop);
+		FLEXT_ADDMETHOD_(0, "close", mindset_close);
 
-		post("Neurosky Mindset External v0.5");
+		
+		post("Neurosky Mindset External v1.0");
 		post("by Nonpolynomial Labs (http://www.nonpolynomial.com)");
 		post("Updates at http://www.github.com/qdot/np_mindset");
 		post("Compiled on " __DATE__ " " __TIME__);
@@ -231,6 +235,8 @@ protected:
 	t_atom m_powerList[7];
 	volatile bool m_hasUpdated;
 	volatile bool m_runThread;
+	volatile bool m_outputRaw;
+	volatile float m_sleepTime;
 	bool m_attentionUpdated;
 	bool m_meditationUpdated;
 	bool m_connectionUpdated;
@@ -270,15 +276,31 @@ protected:
 			}
 			m_isOpen = true;
 			post("Opened Mindset");
+			ToOutBang(0);
 			return;
 		}
 		post("np_mindset: not a valid np_mindset message: %s", msg->s_name);
 	}
 
+	void mindset_raw(long t)
+	{
+		m_outputRaw = (t > 0);
+		if(m_outputRaw)
+		{
+			m_sleepTime = .002;
+		}
+		else
+		{
+			m_sleepTime = .1;
+		}
+		ToOutBang(0);
+	}
+	
 	void mindset_stop()
 	{
 		m_runThread = false;
 		StopThreads();
+		ToOutBang(0);
 	}
 
 	void mindset_start()
@@ -290,29 +312,35 @@ protected:
 		}
 		m_threadMutex.Unlock();
 		ScopedMutex m(m_threadMutex);
+		ToOutBang(0);
 		post("Entering mindset thread");
 		m_runThread = true;
 		while(!ShouldExit() && m_runThread)
 		{
 			read();
 			mindset_output();
-			Sleep(.001);
+			Sleep(m_sleepTime);
 		}
 		post("Exiting mindset thread");
 	}
 
 	void mindset_output()
 	{
+		//If we have nothing to update, don't even worry about locking
+		if(!m_connectionUpdated && !m_attentionUpdated && !m_meditationUpdated && !m_powerUpdated && !m_outputRaw)
+			return;
 		ScopedMutex m(m_mindsetMutex);
 		Lock();
-		ToOutBang(0);
 		if(m_connectionUpdated)
 			ToOutInt(1, m_connectionQuality);
 		if(m_attentionUpdated)
 			ToOutInt(2, m_attentionValue);
 		if(m_meditationUpdated)
-			ToOutInt(3, m_meditationValue);		
-		ToOutInt(4, m_rawLevel);
+			ToOutInt(3, m_meditationValue);
+		if(m_outputRaw)
+		{
+			ToOutInt(4, m_rawLevel);
+		}
 		if(m_powerUpdated)
 		{
 			for(int i = 0; i < 7; ++i)
@@ -334,6 +362,7 @@ private:
 	FLEXT_CALLBACK(mindset_stop)
 	FLEXT_CALLBACK(mindset_close)
 	FLEXT_CALLBACK(mindset_output)
+	FLEXT_CALLBACK_I(mindset_raw)
 };
 
 FLEXT_NEW("np_mindset", np_mindset)

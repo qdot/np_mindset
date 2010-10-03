@@ -1,22 +1,47 @@
-#N canvas 190 131 450 300 10;
-#X floatatom 145 237 5 0 0 0 - - -;
-#X obj 193 157 np_mindset;
-#X msg 150 62 open;
-#X msg 194 83 close;
-#X msg 225 109 start;
-#X msg 295 111 stop;
-#X floatatom 228 233 5 0 0 0 - - -;
-#X floatatom 272 237 5 0 0 0 - - -;
-#X msg 117 184;
-#X floatatom 324 214 5 0 0 0 - - -;
-#X floatatom 327 256 5 0 0 0 - - -;
+#N canvas 190 131 465 356 10;
+#X floatatom -336 236 5 0 0 0 - - -;
+#X obj -347 116 np_mindset;
+#X msg -337 26 close;
+#X msg -329 48 start;
+#X msg -321 70 stop;
+#X floatatom -325 211 5 0 0 0 - - -;
+#X floatatom -313 184 5 0 0 0 - - -;
+#X floatatom -302 159 5 0 0 0 - - -;
+#X msg -347 3 open /dev/tty.Mindset-DevB;
+#X text -180 2 Open device. Takes portname as argument.;
+#X obj -290 92 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X text -296 25 Close device if open.;
+#X text -289 47 Start I/O Thread;
+#X text -289 70 Stop I/O Thread;
+#X text -273 91 Toggle Raw Wave Output (causes much higher cpu util)
+;
+#X obj -347 260 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X text -330 257 Bang on successful command;
+#X text -301 237 Conn. Quality. Closer to 0 is better. 255 is no connection.
+;
+#X text -292 211 eSense Attention Value. 0 to 100;
+#X text -280 186 eSense Meditation Value. 0 to 100;
+#X text -268 160 Raw wave value \, if RWO toggle is on. 16-bit signed
+value.;
+#X symbolatom -290 139 10 0 0 0 - - -;
+#X text -227 140 Wave Values. Delta \, Theta \, High/Low Alpha/Beta
+\, Gamma;
+#X text -354 277 np_mindset by Nonpolynomial Labs http://www.nonpolynomial.com
+;
+#X text -354 314 More externals at http://www.nonpolynomial.com/externals/
+;
+#X text -355 302 Source code at http://www.github.com/qdot/np_mindset
+;
+#X connect 1 0 15 0;
 #X connect 1 1 0 0;
-#X connect 1 1 8 0;
-#X connect 1 2 6 0;
-#X connect 1 3 7 0;
-#X connect 1 4 10 0;
-#X connect 1 5 9 0;
+#X connect 1 2 5 0;
+#X connect 1 3 6 0;
+#X connect 1 4 7 0;
+#X connect 1 5 21 0;
 #X connect 2 0 1 0;
 #X connect 3 0 1 0;
 #X connect 4 0 1 0;
-#X connect 5 0 1 0;
+#X connect 8 0 1 0;
+#X connect 10 0 1 1;

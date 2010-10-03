@@ -5,13 +5,13 @@ Nonpolynomial Labs - http://www.nonpolynomial.com
 
 == Description ==
 
-np_mindset is an external for either Max/MSP or Puredata to receive information from the Neurosky Mindset. 
+np_mindset is an external for either Max/MSP or Puredata to receive information from the Neurosky Mindset EEG Development Kit. 
 
 Portability of source between Max and Pd is available thanks to flext
 
-Max: http://www.cycling74.com
-Pd: http://www.puredata.info
-Flext: http://www.parasitaere-kapazitaeten.net/ext/flext/
+- Max: http://www.cycling74.com
+- Pd: http://www.puredata.info
+- Flext: http://puredata.info/Members/thomas/flext
 
 == Mindset Information ==
 
@@ -36,7 +36,7 @@ None currently known
 
 == Licensing ==
 
-np_mindset is covered under the BSD License.
+np_mindset is covered under the GPL License due to Flext. If you can unwind it from flext somehow, consider it BSD.
 
 === np_mindset Copyright ===
 
