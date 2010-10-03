@@ -2,5 +2,10 @@ np_mindset ChangeLog
 ===========================
 
 2009-09-30 Kyle Machulis <kyle@nonpolynomial.com>
+	* Release v1.1
+	* Added raw mode for reduced CPU utilization
+	* Cleaned threading for less crashes
+	* Updated readme to be more useful
+2009-09-30 Kyle Machulis <kyle@nonpolynomial.com>
 	* Release v1.0
 	* Released first version
