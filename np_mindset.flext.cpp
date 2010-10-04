@@ -96,7 +96,6 @@ int NeuroskyMindset::read()
 	{
 		THINKGEAR_parseByte(m_streamParser.get(), values[i]);
 	}
-	usleep(100);
 }
 
 class np_mindset:
@@ -140,7 +139,7 @@ public:
 		m_connectionQuality(0),
 		m_outputRaw(false),
 		m_rawLevel(0),
-		m_sleepTime(.1)
+		m_sleepTime(.002)
 	{
 
 		// external setup
@@ -161,7 +160,7 @@ public:
 		FLEXT_ADDMETHOD_(0, "close", mindset_close);
 
 		
-		post("Neurosky Mindset External v1.1");
+		post("Neurosky Mindset External v1.1.1");
 		post("by Nonpolynomial Labs (http://www.nonpolynomial.com)");
 		post("Updates at http://www.github.com/qdot/np_mindset");
 		post("Compiled on " __DATE__ " " __TIME__);
@@ -285,14 +284,6 @@ protected:
 	void mindset_raw(long t)
 	{
 		m_outputRaw = (t > 0);
-		if(m_outputRaw)
-		{
-			m_sleepTime = .002;
-		}
-		else
-		{
-			m_sleepTime = .1;
-		}
 		ToOutBang(0);
 	}
 	
