@@ -304,7 +304,7 @@ protected:
 			post("np_mindset - Cannot open, exiting");
 			return;
 		}
-		post("np_mindset - Cannot open, exiting");
+		post("np_mindset - Opened Device");
 		m_isOpen = true;
 		ToOutBang(0);
 
