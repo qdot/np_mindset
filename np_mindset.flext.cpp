@@ -160,7 +160,7 @@ public:
 		FLEXT_ADDMETHOD_(0, "close", mindset_close);
 
 		
-		post("Neurosky Mindset External v1.2");
+		post("Neurosky Mindset External v1.1.5");
 		post("by Nonpolynomial Labs (http://www.nonpolynomial.com)");
 		post("Updates at http://www.github.com/qdot/np_mindset");
 		post("Compiled on " __DATE__ " " __TIME__);
