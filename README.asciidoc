@@ -32,7 +32,10 @@ http://developer.neurosky.com/
 
 == Platform Specifics Issues ==
 
-None currently known
+=== ALL PLATFORMS ===
+
+- Entering a wrong port name may cause Max to crash. Make sure you've got the device on and bonded before hitting the start button. This will be fixed soon.
+- Currently the I/O thread is taking up a TON of CPU because of the polling frequency (2ms). There's a good chance the next version of the external will change how the raw wave output works so I can reduce this. So be warned.
 
 == Licensing ==
 
