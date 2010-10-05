@@ -88,7 +88,7 @@ int NeuroskyMindset::close()
 
 int NeuroskyMindset::read()
 {
-	std::vector<char> values(8);
+	std::vector<char> values(16);
 	boost::system::error_code connection_error;
 
 	m_serialPort.read_some(boost::asio::buffer(values), connection_error);
@@ -154,13 +154,13 @@ public:
 		
 		FLEXT_ADDBANG(0, mindset_output);
 		FLEXT_ADDMETHOD(1, mindset_raw);
-		FLEXT_ADDMETHOD_(0, "open", mindset_anything);
+		FLEXT_ADDMETHOD_(0, "port", mindset_anything);
 		FLEXT_ADDMETHOD_(0, "start", mindset_start);
 		FLEXT_ADDMETHOD_(0, "stop", mindset_stop);
 		FLEXT_ADDMETHOD_(0, "close", mindset_close);
 
 		
-		post("Neurosky Mindset External v1.1.1");
+		post("Neurosky Mindset External v1.2");
 		post("by Nonpolynomial Labs (http://www.nonpolynomial.com)");
 		post("Updates at http://www.github.com/qdot/np_mindset");
 		post("Compiled on " __DATE__ " " __TIME__);
@@ -230,6 +230,7 @@ protected:
 	int m_meditationValue;
 	int m_connectionQuality;
 	int m_rawLevel;
+	std::string m_portName;
 	boost::array<unsigned int, 7> m_powerLevels;
 	t_atom m_powerList[7];
 	volatile bool m_hasUpdated;
@@ -265,16 +266,10 @@ protected:
 
 	void mindset_anything(const t_symbol *msg,int argc,t_atom *argv)
 	{
-		if(!strcmp(msg->s_name, "open"))
+		if(!strcmp(msg->s_name, "port"))
 		{
-			std::string port = GetString(argv[0]);
-			if(!open(port))
-			{
-				post("np_mindset - Cannot open, exiting");
-				return;
-			}
-			m_isOpen = true;
-			post("np_mindset - Opened Mindset");
+			m_portName = GetString(argv[0]);
+			post("np_mindset - Port set to %s", m_portName.c_str());
 			ToOutBang(0);
 			return;
 		}
@@ -295,7 +290,7 @@ protected:
 	}
 
 	void mindset_start()
-	{
+	{		
 		if(!m_threadMutex.TryLock())
 		{
 			post("np_mindset - Thread already running");
@@ -303,8 +298,16 @@ protected:
 		}
 		m_threadMutex.Unlock();
 		ScopedMutex m(m_threadMutex);
-		ToOutBang(0);
 		post("np_mindset - Entering mindset thread");
+		if(!open(m_portName))
+		{
+			post("np_mindset - Cannot open, exiting");
+			return;
+		}
+		post("np_mindset - Cannot open, exiting");
+		m_isOpen = true;
+		ToOutBang(0);
+
 		m_runThread = true;
 		while(!ShouldExit() && m_runThread)
 		{
@@ -312,6 +315,8 @@ protected:
 			mindset_output();
 			Sleep(m_sleepTime);
 		}
+		close();
+		m_isOpen = false;
 		post("np_mindset - Exiting mindset thread");
 	}
 
