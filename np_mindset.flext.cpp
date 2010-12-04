@@ -76,9 +76,12 @@ NeuroskyMindset::~NeuroskyMindset()
 
 int NeuroskyMindset::open(std::string port_name)
 {
+
 	m_serialPort.open(port_name);
+	if(!m_serialPort.is_open())
+		return false;
 	m_serialPort.set_option(boost::asio::serial_port::baud_rate(57600));
-	return m_serialPort.is_open();
+	return true;
 }
 
 int NeuroskyMindset::close()
@@ -160,7 +163,7 @@ public:
 		FLEXT_ADDMETHOD_(0, "close", mindset_close);
 
 		
-		post("Neurosky Mindset External v1.1.5");
+		post("Neurosky Mindset External v1.1.6");
 		post("by Nonpolynomial Labs (http://www.nonpolynomial.com)");
 		post("Updates at http://www.github.com/qdot/np_mindset");
 		post("Compiled on " __DATE__ " " __TIME__);
@@ -297,11 +300,16 @@ protected:
 			return;
 		}
 		m_threadMutex.Unlock();
+		if(m_portName == "")
+		{
+			post("np_mindset - Port not set. Please use port command to set port name.");
+			return;
+		}
 		ScopedMutex m(m_threadMutex);
 		post("np_mindset - Entering mindset thread");
 		if(!open(m_portName))
 		{
-			post("np_mindset - Cannot open, exiting");
+			post("np_mindset - Cannot open device at %s, exiting", m_portName.c_str());
 			return;
 		}
 		post("np_mindset - Opened Device");

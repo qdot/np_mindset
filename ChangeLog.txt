@@ -1,7 +1,10 @@
 np_mindset ChangeLog
 ===========================
 
-2009-10-04 Kyle Machulis <kyle@nonpolynomial.com>
+2010-12-03 Kyle Machulis <kyle@nonpolynomial.com>
+	* Release v1.1.6
+	* Fixed crash when port name not set
+2010-10-04 Kyle Machulis <kyle@nonpolynomial.com>
 	* Release v1.1.5
 	* Fixed bug with read buffer not being large enough and causing buffer backups
 	* Changed open/close to be start/stop instead, so open/close happens inside the thread.
