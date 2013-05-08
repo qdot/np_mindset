@@ -1,4 +1,8 @@
-= np_mindset Max/MSP and Pd External =
+== NOTE ==
+
+THIS EXTERNAL WILL NOT WORK WITH THE NEUROSKY MINDWAVE. IT WILL ONLY WORK WITH THE OLD BLUETOOTH NEUROSKY MINDSET. I DO NOT HAVE A MINDWAVE AND HAVE NO PLANS ON SUPPORTING IT.
+
+== np_mindset Max/MSP and Pd External ==
 
 by Kyle Machulis <kyle@nonpolynomial.com>
 Nonpolynomial Labs - http://www.nonpolynomial.com
